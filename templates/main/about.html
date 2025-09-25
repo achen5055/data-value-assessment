@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}关于系统 - 数据价值评估系统{% endblock %}
+
+{% block page_title %}关于数据价值评估系统{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title">系统简介</h3>
+                <p class="card-text">
+                    数据价值评估系统是一个专业的Web应用程序，旨在帮助用户评估数据集的质量、完整性、一致性、准确性和业务价值。
+                    通过科学的评估方法和可视化工具，为数据资产提供全面的价值分析。
+                </p>
+                
+                <h4 class="mt-4">核心功能</h4>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>数据质量评估</strong> - 全面评估数据的完整性、一致性、准确性和时效性
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>数据完整性检查</strong> - 检测数据缺失情况，提供详细的完整性分析报告
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>数据价值计算</strong> - 基于多维度指标计算数据的业务价值和潜在价值
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>数据可视化展示</strong> - 通过丰富的图表和仪表盘直观展示数据分析结果
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>用户管理系统</strong> - 提供安全的用户认证和权限管理功能
+                    </li>
+                </ul>
+                
+                <h4 class="mt-4">技术特点</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-code me-2"></i>技术栈</h5>
+                                <ul class="list-unstyled">
+                                    <li>• Python Flask 后端框架</li>
+                                    <li>• SQLAlchemy ORM</li>
+                                    <li>• Bootstrap 5 前端框架</li>
+                                    <li>• ECharts 数据可视化</li>
+                                    <li>• Pandas 数据处理</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-database me-2"></i>数据支持</h5>
+                                <ul class="list-unstyled">
+                                    <li>• CSV 文件格式</li>
+                                    <li>• Excel 文件格式</li>
+                                    <li>• JSON 文件格式</li>
+                                    <li>• SQLite 数据库</li>
+                                    <li>• 支持MySQL/PostgreSQL</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>系统信息</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>版本:</strong> v1.0.0
+                </div>
+                <div class="mb-3">
+                    <strong>发布日期:</strong> 2025-09-23
+                </div>
+                <div class="mb-3">
+                    <strong>开发者:</strong> 数据价值评估团队
+                </div>
+                <div class="mb-3">
+                    <strong>许可证:</strong> MIT License
+                </div>
+                <div>
+                    <strong>技术支持:</strong> support@example.com
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-rocket me-2"></i>快速开始</h5>
+            </div>
+            <div class="card-body">
+                <ol class="ps-3">
+                    <li class="mb-2">注册并登录系统</li>
+                    <li class="mb-2">上传您的数据集文件</li>
+                    <li class="mb-2">创建数据质量评估规则</li>
+                    <li class="mb-2">运行数据价值评估</li>
+                    <li>查看详细的评估报告</li>
+                </ol>
+                <div class="d-grid gap-2 mt-3">
+                    <a href="{{ url_for('main.help') }}" class="btn btn-outline-success">
+                        <i class="fas fa-book me-1"></i>查看详细教程
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}上传数据集 - 数据价值评估系统{% endblock %}
+
+{% block page_title %}上传数据集{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-upload me-2"></i>上传新数据集</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('data.upload') }}" enctype="multipart/form-data" id="uploadForm">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">数据集名称</label>
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="请输入数据集名称") }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">数据集描述</label>
+                        {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), placeholder="请输入数据集描述（可选）", rows="3") }}
+                        {% if form.description.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.description.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="file" class="form-label">选择数据文件</label>
+                        {{ form.file(class="form-control" + (" is-invalid" if form.file.errors else ""), accept=".csv,.xlsx,.xls,.json") }}
+                        {% if form.file.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.file.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            支持的文件格式：CSV (.csv), Excel (.xlsx, .xls), JSON (.json)
+                            <br>最大文件大小：16MB
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.is_public(class="form-check-input") }}
+                            <label class="form-check-label" for="is_public">
+                                设为公开数据集（其他用户可见）
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('data.datasets') }}" class="btn btn-secondary me-md-2">取消</a>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-upload me-1"></i>上传数据集
+                        </button>
+                    </div>
+                </form>
+
+                <!-- 文件预览区域 -->
+                <div id="filePreview" class="mt-4" style="display: none;">
+                    <h6><i class="fas fa-eye me-2"></i>文件预览</h6>
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="previewContent" class="table-responsive">
+                                <!-- 预览内容将通过JavaScript动态加载 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 上传指南 -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>上传指南</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>CSV文件要求：</h6>
+                        <ul class="small">
+                            <li>使用UTF-8编码</li>
+                            <li>第一行为列标题</li>
+                            <li>使用逗号分隔</li>
+                            <li>支持引号转义</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Excel文件要求：</h6>
+                        <ul class="small">
+                            <li>支持.xlsx和.xls格式</li>
+                            <li>第一个工作表为数据</li>
+                            <li>第一行为列标题</li>
+                            <li>避免合并单元格</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('file');
+        const previewDiv = document.getElementById('filePreview');
+        const previewContent = document.getElementById('previewContent');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // 文件选择变化事件
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                // 显示预览区域
+                previewDiv.style.display = 'block';
+                
+                // 显示文件基本信息
+                previewContent.innerHTML = `
+                    <div class="text-center py-3">
+                        <i class="fas fa-file fa-3x text-primary mb-2"></i>
+                        <h6>${file.name}</h6>
+                        <p class="text-muted mb-1">大小: ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        <p class="text-muted">类型: ${file.type || '未知'}</p>
+                    </div>
+                `;
+
+                // 如果是CSV或文本文件，尝试预览内容
+                if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                    previewCSVFile(file);
+                }
+            } else {
+                previewDiv.style.display = 'none';
+            }
+        });
+
+        // 表单提交事件
+        const form = document.getElementById('uploadForm');
+        form.addEventListener('submit', function(e) {
+            const file = fileInput.files[0];
+            if (!file) {
+                e.preventDefault();
+                showAlert('请选择要上传的文件', 'warning');
+                return false;
+            }
+
+            // 检查文件大小（16MB限制）
+            if (file.size > 16 * 1024 * 1024) {
+                e.preventDefault();
+                showAlert('文件大小超过16MB限制', 'warning');
+                return false;
+            }
+
+            // 显示上传进度
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>上传中...';
+        });
+
+        function previewCSVFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const lines = content.split('\n').slice(0, 6); // 预览前6行
+                
+                let tableHTML = '<table class="table table-sm table-bordered">';
+                lines.forEach((line, index) => {
+                    const cells = line.split(',');
+                    tableHTML += '<tr>';
+                    cells.forEach(cell => {
+                        if (index === 0) {
+                            tableHTML += `<th>${cell.trim()}</th>`;
+                        } else {
+                            tableHTML += `<td>${cell.trim()}</td>`;
+                        }
+                    });
+                    tableHTML += '</tr>';
+                });
+                tableHTML += '</table>';
+                
+                previewContent.innerHTML = `
+                    <h6>数据预览（前${lines.length}行）</h6>
+                    ${tableHTML}
+                    <small class="text-muted">仅显示前6行数据作为预览</small>
+                `;
+            };
+            reader.readAsText(file);
+        }
+
+        function showAlert(message, type = 'info') {
+            // 创建警告消息
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-info-circle me-2"></i>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // 插入到表单前面
+            form.parentNode.insertBefore(alertDiv, form);
+            
+            // 自动隐藏
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    const bsAlert = new bootstrap.Alert(alertDiv);
+                    bsAlert.close();
+                }
+            }, 5000);
+        }
+    });
+</script>
+{% endblock %}

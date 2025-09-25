@@ -1,0 +1,60 @@
+<!-- Flash消息模板 -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {% if category == 'success' %}
+                        <i class="fas fa-check-circle me-2"></i>
+                    {% elif category == 'danger' %}
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                    {% elif category == 'warning' %}
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                    {% elif category == 'info' %}
+                        <i class="fas fa-info-circle me-2"></i>
+                    {% else %}
+                        <i class="fas fa-bell me-2"></i>
+                    {% endif %}
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<style>
+.flash-messages {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 400px;
+}
+
+.flash-messages .alert {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    border: none;
+    border-radius: 0.35rem;
+    margin-bottom: 0.5rem;
+}
+
+.flash-messages .alert-dismissible .btn-close {
+    padding: 0.75rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 自动隐藏flash消息
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            if (alert.parentNode) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }
+        }, 5000);
+    });
+});
+</script>

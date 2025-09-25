@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+
+{% block title %}创建评估 - 数据价值评估系统{% endblock %}
+
+{% block page_title %}创建数据价值评估{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>创建新评估</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('assessment.new_assessment') }}" id="assessmentForm">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- 基础信息 -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2">基础信息</h6>
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">评估名称</label>
+                            {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="请输入评估名称") }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">评估描述</label>
+                            {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), placeholder="请输入评估描述（可选）", rows="3") }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- 数据集选择 -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2">数据集选择</h6>
+                        
+                        <div class="mb-3">
+                            <label for="dataset_id" class="form-label">选择数据集</label>
+                            {{ form.dataset_id(class="form-select" + (" is-invalid" if form.dataset_id.errors else "")) }}
+                            {% if form.dataset_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.dataset_id.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">选择要进行评估的数据集</div>
+                        </div>
+
+                        <!-- 数据集预览 -->
+                        <div id="datasetPreview" class="card mt-3" style="display: none;">
+                            <div class="card-body">
+                                <h6>数据集信息</h6>
+                                <div id="previewContent"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 评估类型 -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2">评估类型</h6>
+                        
+                        <div class="mb-3">
+                            <label for="assessment_type" class="form-label">评估类型</label>
+                            {{ form.assessment_type(class="form-select" + (" is-invalid" if form.assessment_type.errors else "")) }}
+                            {% if form.assessment_type.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.assessment_type.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- 评估类型说明 -->
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-check-circle text-info fa-2x mb-2"></i>
+                                        <h6>数据质量评估</h6>
+                                        <p class="small text-muted">评估数据的完整性、一致性、准确性等质量指标</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-chart-line text-success fa-2x mb-2"></i>
+                                        <h6>数据价值评估</h6>
+                                        <p class="small text-muted">评估数据的业务价值、经济价值和潜在价值</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-star text-primary fa-2x mb-2"></i>
+                                        <h6>综合评估</h6>
+                                        <p class="small text-muted">综合评估数据质量和价值，提供全面分析</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 评估配置 -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2">评估配置</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">评估指标权重</label>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="quality_weight" class="form-label">数据质量权重</label>
+                                            <div class="input-group">
+                                                {{ form.quality_weight(class="form-range", min="0", max="100", value="50") }}
+                                                <span class="input-group-text" id="qualityWeightValue">50%</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="value_weight" class="form-label">数据价值权重</label>
+                                            <div class="input-group">
+                                                {{ form.value_weight(class="form-range", min="0", max="100", value="50") }}
+                                                <span class="input-group-text" id="valueWeightValue">50%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <div class="progress">
+                                            <div class="progress-bar bg-info" id="qualityProgress" style="width: 50%">质量 50%</div>
+                                            <div class="progress-bar bg-success" id="valueProgress" style="width: 50%">价值 50%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.generate_report(class="form-check-input", checked=true) }}
+                                <label class="form-check-label" for="generate_report">
+                                    生成详细评估报告
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.include_visualization(class="form-check-input", checked=true) }}
+                                <label class="form-check-label" for="include_visualization">
+                                    包含可视化图表
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('assessment.assessments') }}" class="btn btn-secondary me-md-2">取消</a>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-play me-1"></i>开始评估
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- 评估指南 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>评估指南</h6>
+            </div>
+            <div class="card-body">
+                <h6>评估流程</h6>
+                <ol class="small">
+                    <li class="mb-2">选择要评估的数据集</li>
+                    <li class="mb-2">配置评估类型和参数</li>
+                    <li class="mb-2">系统自动分析数据质量</li>
+                    <li class="mb-2">计算数据价值指标</li>
+                    <li class="mb-2">生成综合评估报告</li>
+                </ol>
+
+                <h6>评估时间</h6>
+                <p class="small text-muted">评估时间取决于数据集大小，通常需要几秒到几分钟。</p>
+
+                <h6>结果说明</h6>
+                <p class="small text-muted">评估完成后，您可以查看详细的评估报告和可视化图表。</p>
+            </div>
+        </div>
+
+        <!-- 最近数据集 -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-history me-2"></i>最近数据集</h6>
+            </div>
+            <div class="card-body">
+                {% if recent_datasets %}
+                <div class="list-group list-group-flush">
+                    {% for dataset in recent_datasets %}
+                    <a href="#" class="list-group-item list-group-item-action dataset-item" data-dataset-id="{{ dataset.id }}">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ dataset.name }}</h6>
+                            <small>{{ dataset.created_at.strftime('%m-%d') }}</small>
+                        </div>
+                        <p class="mb-1 small text-muted">{{ dataset.row_count }} 行 × {{ dataset.column_count }} 列</p>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted small">暂无数据集，请先上传数据集。</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const datasetSelect = document.getElementById('dataset_id');
+        const datasetPreview = document.getElementById('datasetPreview');
+        const previewContent = document.getElementById('previewContent');
+        const qualityWeight = document.getElementById('quality_weight');
+        const valueWeight = document.getElementById('value_weight');
+        const qualityValue = document.getElementById('qualityWeightValue');
+        const valueValue = document.getElementById('valueWeightValue');
+        const qualityProgress = document.getElementById('qualityProgress');
+        const valueProgress = document.getElementById('valueProgress');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // 数据集选择变化事件
+        if (datasetSelect) {
+            datasetSelect.addEventListener('change', function() {
+                const datasetId = this.value;
+                if (datasetId) {
+                    // 显示数据集预览
+                    datasetPreview.style.display = 'block';
+                    
+                    // 这里可以添加AJAX请求来获取数据集详情
+                    // 暂时显示静态信息
+                    previewContent.innerHTML = `
+                        <div class="text-center py-2">
+                            <i class="fas fa-spinner fa-spin me-2"></i>加载数据集信息...
+                        </div>
+                    `;
+                    
+                    // 模拟加载延迟
+                    setTimeout(() => {
+                        previewContent.innerHTML = `
+                            <div class="row">
+                                <div class="col-6">
+                                    <small><strong>记录数:</strong><br>1,000 行</small>
+                                </div>
+                                <div class="col-6">
+                                    <small><strong>列数:</strong><br>15 列</small>
+                                </div>
+                                <div class="col-6">
+                                    <small><strong>文件类型:</strong><br>CSV</small>
+                                </div>
+                                <div class="col-6">
+                                    <small><strong>上传时间:</strong><br>2025-09-23</small>
+                                </div>
+                            </div>
+                        `;
+                    }, 1000);
+                } else {
+                    datasetPreview.style.display = 'none';
+                }
+            });
+        }
+
+        // 权重调整
+        function updateWeights() {
+            const quality = parseInt(qualityWeight.value);
+            const value = parseInt(valueWeight.value);
+            const total = quality + value;
+            
+            if (total !== 100) {
+                // 自动调整权重使其总和为100
+                const scale = 100 / total;
+                qualityWeight.value = Math.round(quality * scale);
+                valueWeight.value = Math.round(value * scale);
+            }
+            
+            const newQuality = parseInt(qualityWeight.value);
+            const newValue = parseInt(valueWeight.value);
+            
+            qualityValue.textContent = newQuality + '%';
+            valueValue.textContent = newValue + '%';
+            
+            qualityProgress.style.width = newQuality + '%';
+            qualityProgress.textContent = '质量 ' + newQuality + '%';
+            valueProgress.style.width = newValue + '%';
+            valueProgress.textContent = '价值 ' + newValue + '%';
+        }
+
+        if (qualityWeight && valueWeight) {
+            qualityWeight.addEventListener('input', updateWeights);
+            valueWeight.addEventListener('input', updateWeights);
+            updateWeights(); // 初始化
+        }
+
+        // 最近数据集点击事件
+        const datasetItems = document.querySelectorAll('.dataset-item');
+        datasetItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const datasetId = this.getAttribute('data-dataset-id');
+                if (datasetSelect) {
+                    datasetSelect.value = datasetId;
+                    datasetSelect.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+
+        // 表单提交事件
+        const form = document.getElementById('assessmentForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (!datasetSelect.value) {
+                    e.preventDefault();
+                    showAlert('请选择要评估的数据集', 'warning');
+                    return false;
+                }
+                
+                // 显示加载状态
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>评估中...';
+            });
+        }
+
+        function showAlert(message, type = 'info') {
+            // 创建警告消息
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-info-circle me-2"></i>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // 插入到表单前面
+            const form = document.querySelector('form');
+            if (form) {
+                form.parentNode.insertBefore(alertDiv, form);
+                
+                // 自动隐藏
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        const bsAlert = new bootstrap.Alert(alertDiv);
+                        bsAlert.close();
+                    }
+                }, 5000);
+            }
+        }
+    });
+</script>
+{% endblock %}

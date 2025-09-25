@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+
+{% block title %}{{ assessment.name }} - 可视化分析{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+.chart-container {
+    height: 400px;
+    margin-bottom: 20px;
+}
+.score-card {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+.score-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 10px 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ assessment.name }} - 可视化分析</h1>
+        <div>
+            <a href="{{ url_for('assessment.view_assessment', assessment_id=assessment.id) }}" class="btn btn-secondary btn-icon-split mr-2">
+                <span class="icon text-white-50">
+                    <i class="fas fa-arrow-left"></i>
+                </span>
+                <span class="text">返回评估详情</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 总体评分 -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">总体评分</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% if assessment.overall_score is not none %}
+                                {{ "%.1f"|format(assessment.overall_score) }}/100
+                                {% else %}
+                                未评分
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-star fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">数据集</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800">{{ dataset.name }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-database fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">评估状态</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ assessment.status_display }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">评估时间</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% if assessment.duration %}
+                                {{ assessment.duration }} 秒
+                                {% else %}
+                                未记录
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图表区域 -->
+    <div class="row">
+        <!-- 雷达图 -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">数据质量雷达图</h6>
+                </div>
+                <div class="card-body">
+                    <div id="radarChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 柱状图 -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">各项指标得分</h6>
+                </div>
+                <div class="card-body">
+                    <div id="barChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 饼图 -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">质量分布</h6>
+                </div>
+                <div class="card-body">
+                    <div id="pieChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 趋势图 -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">历史趋势</h6>
+                </div>
+                <div class="card-body">
+                    <div id="lineChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 从后端获取图表数据和评估数据
+var chartData = JSON.parse('{{ chart_data|tojson|safe }}');
+var assessmentData = JSON.parse('{{ assessment|tojson|safe }}');
+
+// 初始化图表
+document.addEventListener('DOMContentLoaded', function() {
+    // 雷达图 - 使用实际数据
+    var radarChart = echarts.init(document.getElementById('radarChart'));
+    var radarData = null;
+    
+    // 查找雷达图数据
+    for (var i = 0; i < chartData.charts.length; i++) {
+        if (chartData.charts[i].type === 'radar') {
+            radarData = chartData.charts[i];
+            break;
+        }
+    }
+    
+    if (radarData) {
+        // 使用实际的雷达图数据
+        var indicators = radarData.categories.map(function(category) {
+            return { name: category, max: 100 };
+        });
+        
+        radarChart.setOption({
+            title: { text: radarData.title || '数据质量评估' },
+            tooltip: {},
+            legend: { data: [radarData.series[0].name || '当前评估'] },
+            radar: { indicator: indicators },
+            series: [{
+                name: radarData.series[0].name || '数据质量',
+                type: 'radar',
+                data: [{
+                    value: radarData.series[0].data,
+                    name: radarData.series[0].name || '当前评估'
+                }]
+            }]
+        });
+    } else {
+        // 如果没有雷达图数据，使用评估分数创建一个
+        var scores = {
+            '完整性': assessmentData.completeness_score,
+            '准确性': assessmentData.accuracy_score,
+            '一致性': assessmentData.consistency_score,
+            '时效性': assessmentData.timeliness_score,
+            '业务价值': assessmentData.business_value_score
+        };
+        
+        var categories = Object.keys(scores);
+        var values = Object.values(scores);
+        
+        radarChart.setOption({
+            title: { text: '数据质量评估' },
+            tooltip: {},
+            legend: { data: ['当前评估'] },
+            radar: {
+                indicator: categories.map(function(category) {
+                    return { name: category, max: 100 };
+                })
+            },
+            series: [{
+                name: '数据质量',
+                type: 'radar',
+                data: [{
+                    value: values,
+                    name: '当前评估'
+                }]
+            }]
+        });
+    }
+
+    // 柱状图 - 使用实际数据
+    var barChart = echarts.init(document.getElementById('barChart'));
+    var barData = {
+        '完整性': assessmentData.completeness_score,
+        '准确性': assessmentData.accuracy_score,
+        '一致性': assessmentData.consistency_score,
+        '时效性': assessmentData.timeliness_score,
+        '业务价值': assessmentData.business_value_score
+    };
+    
+    var barCategories = Object.keys(barData);
+    var barValues = Object.values(barData);
+    
+    barChart.setOption({
+        title: { text: '各项指标得分' },
+        tooltip: {},
+        xAxis: { data: barCategories },
+        yAxis: { max: 100 },
+        series: [{
+            name: '得分',
+            type: 'bar',
+            data: barValues,
+            itemStyle: {
+                color: function(params) {
+                    var value = params.data;
+                    if (value >= 90) return '#1cc88a';
+                    if (value >= 80) return '#36b9cc';
+                    if (value >= 70) return '#f6c23e';
+                    return '#e74a3b';
+                }
+            }
+        }]
+    });
+
+    // 饼图 - 使用实际数据
+    var pieChart = echarts.init(document.getElementById('pieChart'));
+    
+    // 根据各项得分计算质量等级分布
+    var scores = [
+        assessmentData.completeness_score,
+        assessmentData.accuracy_score,
+        assessmentData.consistency_score,
+        assessmentData.timeliness_score,
+        assessmentData.business_value_score
+    ];
+    
+    var excellent = 0, good = 0, average = 0, poor = 0;
+    
+    scores.forEach(function(score) {
+        if (score >= 90) excellent++;
+        else if (score >= 80) good++;
+        else if (score >= 70) average++;
+        else poor++;
+    });
+    
+    pieChart.setOption({
+        title: { text: '质量等级分布' },
+        tooltip: { trigger: 'item' },
+        series: [{
+            name: '质量等级',
+            type: 'pie',
+            radius: '50%',
+            data: [
+                { value: excellent, name: '优秀 (90-100)' },
+                { value: good, name: '良好 (80-89)' },
+                { value: average, name: '一般 (70-79)' },
+                { value: poor, name: '需改进 (<70)' }
+            ],
+            emphasis: {
+                itemStyle: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        }]
+    });
+
+    // 趋势图 - 使用仪表盘代替
+    var lineChart = echarts.init(document.getElementById('lineChart'));
+    
+    // 查找仪表盘数据
+    var gaugeData = null;
+    for (var i = 0; i < chartData.charts.length; i++) {
+        if (chartData.charts[i].type === 'gauge') {
+            gaugeData = chartData.charts[i];
+            break;
+        }
+    }
+    
+    if (gaugeData) {
+        lineChart.setOption({
+            title: { text: gaugeData.title || '综合价值评分' },
+            series: [{
+                type: 'gauge',
+                detail: { formatter: '{value}' },
+                data: [{ value: gaugeData.value, name: '综合评分' }],
+                min: gaugeData.min || 0,
+                max: gaugeData.max || 100,
+                axisLine: {
+                    lineStyle: {
+                        width: 30,
+                        color: [
+                            [0.4, '#e74a3b'],
+                            [0.7, '#f6c23e'],
+                            [1, '#1cc88a']
+                        ]
+                    }
+                }
+            }]
+        });
+    } else {
+        // 如果没有仪表盘数据，使用总体评分
+        lineChart.setOption({
+            title: { text: '综合价值评分' },
+            series: [{
+                type: 'gauge',
+                detail: { formatter: '{value}' },
+                data: [{ value: assessmentData.overall_score, name: '综合评分' }],
+                min: 0,
+                max: 100,
+                axisLine: {
+                    lineStyle: {
+                        width: 30,
+                        color: [
+                            [0.4, '#e74a3b'],
+                            [0.7, '#f6c23e'],
+                            [1, '#1cc88a']
+                        ]
+                    }
+                }
+            }]
+        });
+    }
+
+    // 响应式调整
+    window.addEventListener('resize', function() {
+        radarChart.resize();
+        barChart.resize();
+        pieChart.resize();
+        lineChart.resize();
+    });
+});
+</script>
+{% endblock %}

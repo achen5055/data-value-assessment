@@ -1,0 +1,532 @@
+{% extends "base.html" %}
+
+{% block title %}{{ assessment.name }} - 可视化分析{% endblock %}
+
+{% block page_title %}可视化分析：{{ assessment.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <!-- 导航选项卡 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="visualizationTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                            <i class="fas fa-chart-pie me-1"></i>概览
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="quality-tab" data-bs-toggle="tab" data-bs-target="#quality" type="button" role="tab">
+                            <i class="fas fa-check-circle me-1"></i>数据质量
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="value-tab" data-bs-toggle="tab" data-bs-target="#value" type="button" role="tab">
+                            <i class="fas fa-chart-line me-1"></i>数据价值
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="comparison-tab" data-bs-toggle="tab" data-bs-target="#comparison" type="button" role="tab">
+                            <i class="fas fa-balance-scale me-1"></i>对比分析
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="visualizationContent">
+                    <!-- 概览选项卡 -->
+                    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">综合得分雷达图</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="radarChart" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">得分分布</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="scoreDistributionChart" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">关键指标</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row text-center">
+                                            <div class="col-md-3">
+                                                <div class="card bg-primary text-white">
+                                                    <div class="card-body">
+                                                        <h3>{{ "%.1f"|format(assessment.overall_score) if assessment.overall_score else 0 }}</h3>
+                                                        <p class="mb-0">综合得分</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="card bg-success text-white">
+                                                    <div class="card-body">
+                                                        <h3>{{ quality_score if quality_score else 0 }}</h3>
+                                                        <p class="mb-0">质量得分</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="card bg-info text-white">
+                                                    <div class="card-body">
+                                                        <h3>{{ value_score if value_score else 0 }}</h3>
+                                                        <p class="mb-0">价值得分</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="card bg-warning text-white">
+                                                    <div class="card-body">
+                                                        <h3>{{ assessment.duration if assessment.duration else 0 }}</h3>
+                                                        <p class="mb-0">评估耗时(秒)</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据质量选项卡 -->
+                    <div class="tab-pane fade" id="quality" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">质量指标分布</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="qualityBarChart" height="250"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">完整性分析</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="completenessChart" height="250"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">数据质量问题统计</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>问题类型</th>
+                                                        <th>数量</th>
+                                                        <th>影响程度</th>
+                                                        <th>建议</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>缺失值</td>
+                                                        <td>125</td>
+                                                        <td><span class="badge bg-warning">中等</span></td>
+                                                        <td>建议填充或删除</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>异常值</td>
+                                                        <td>23</td>
+                                                        <td><span class="badge bg-success">轻微</span></td>
+                                                        <td>建议检查数据来源</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>格式错误</td>
+                                                        <td>8</td>
+                                                        <td><span class="badge bg-success">轻微</span></td>
+                                                        <td>建议数据清洗</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>重复数据</td>
+                                                        <td>45</td>
+                                                        <td><span class="badge bg-warning">中等</span></td>
+                                                        <td>建议去重处理</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据价值选项卡 -->
+                    <div class="tab-pane fade" id="value" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">价值指标趋势</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="valueTrendChart" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">价值构成</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="valuePieChart" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">价值评估详情</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="card bg-light">
+                                                    <div class="card-body text-center">
+                                                        <h4>业务价值</h4>
+                                                        <h2 class="text-primary">85.2</h2>
+                                                        <p class="text-muted">支持决策和业务流程</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card bg-light">
+                                                    <div class="card-body text-center">
+                                                        <h4>经济价值</h4>
+                                                        <h2 class="text-success">72.8</h2>
+                                                        <p class="text-muted">直接经济效益评估</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card bg-light">
+                                                    <div class="card-body text-center">
+                                                        <h4>潜在价值</h4>
+                                                        <h2 class="text-info">68.5</h2>
+                                                        <p class="text-muted">未来发展潜力评估</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 对比分析选项卡 -->
+                    <div class="tab-pane fade" id="comparison" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">历史评估对比</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="comparisonChart" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">基准对比</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>指标</th>
+                                                        <th>当前得分</th>
+                                                        <th>行业基准</th>
+                                                        <th>差距</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>数据完整性</td>
+                                                        <td>88.5</td>
+                                                        <td>92.0</td>
+                                                        <td><span class="text-danger">-3.5</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>数据准确性</td>
+                                                        <td>91.2</td>
+                                                        <td>89.5</td>
+                                                        <td><span class="text-success">+1.7</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>数据一致性</td>
+                                                        <td>85.8</td>
+                                                        <td>87.2</td>
+                                                        <td><span class="text-danger">-1.4</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>业务价值</td>
+                                                        <td>85.2</td>
+                                                        <td>83.5</td>
+                                                        <td><span class="text-success">+1.7</span></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">改进建议</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="list-group">
+                                            <div class="list-group-item">
+                                                <h6 class="mb-1">提升数据完整性</h6>
+                                                <p class="mb-1 small">建议增加数据采集频率，完善数据录入流程</p>
+                                            </div>
+                                            <div class="list-group-item">
+                                                <h6 class="mb-1">优化数据一致性</h6>
+                                                <p class="mb-1 small">建议建立统一的数据标准和验证规则</p>
+                                            </div>
+                                            <div class="list-group-item">
+                                                <h6 class="mb-1">挖掘数据潜在价值</h6>
+                                                <p class="mb-1 small">建议结合业务场景进行深度数据分析</p>
+                                            </div>
+                                            <div class="list-group-item">
+                                                <h6 class="mb-1">加强数据质量管理</h6>
+                                                <p class="mb-1 small">建议建立定期的数据质量检查机制</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="btn-group">
+                    <a href="{{ url_for('assessment.detail', assessment_id=assessment.id) }}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-1"></i>返回评估详情
+                    </a>
+                    <button class="btn btn-outline-success" onclick="exportCharts()">
+                        <i class="fas fa-download me-1"></i>导出图表
+                    </button>
+                    <button class="btn btn-outline-info" onclick="printCharts()">
+                        <i class="fas fa-print me-1"></i>打印报告
+                    </button>
+                    <a href="{{ url_for('assessment.assessments') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-list me-1"></i>评估列表
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 初始化所有图表
+        initRadarChart();
+        initScoreDistributionChart();
+        initQualityBarChart();
+        initCompletenessChart();
+        initValueTrendChart();
+        initValuePieChart();
+        initComparisonChart();
+
+        // 选项卡切换时重新渲染图表
+        const tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
+        tabs.forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function() {
+                // 给图表一些时间重新渲染
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 100);
+            });
+        });
+    });
+
+    function initRadarChart() {
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['完整性', '准确性', '一致性', '时效性', '业务价值', '经济价值'],
+                datasets: [{
+                    label: '当前评估',
+                    data: [88.5, 91.2, 85.8, 92.3, 85.2, 72.8],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scales: {
+                    r: {
+                        angleLines: { display: true },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                }
+            }
+        });
+    }
+
+    function initScoreDistributionChart() {
+        const ctx = document.getElementById('scoreDistributionChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['优秀 (80-100)', '良好 (60-79)', '一般 (40-59)', '较差 (0-39)'],
+                datasets: [{
+                    data: [45, 30, 15, 10],
+                    backgroundColor: ['#28a745', '#20c997', '#ffc107', '#dc3545']
+                }]
+            }
+        });
+    }
+
+    // 其他图表初始化函数...
+    function initQualityBarChart() {
+        const ctx = document.getElementById('qualityBarChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['完整性', '准确性', '一致性', '时效性', '可用性'],
+                datasets: [{
+                    label: '得分',
+                    data: [88.5, 91.2, 85.8, 92.3, 89.7],
+                    backgroundColor: 'rgba(40, 167, 69, 0.8)'
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true, max: 100 } }
+            }
+        });
+    }
+
+    function initCompletenessChart() {
+        const ctx = document.getElementById('completenessChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['完整数据', '缺失数据', '异常数据'],
+                datasets: [{
+                    data: [85, 10, 5],
+                    backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                }]
+            }
+        });
+    }
+
+    function initValueTrendChart() {
+        const ctx = document.getElementById('valueTrendChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                datasets: [{
+                    label: '业务价值',
+                    data: [78, 82, 79, 85, 88, 85],
+                    borderColor: '#007bff',
+                    tension: 0.1
+                }, {
+                    label: '经济价值',
+                    data: [65, 68, 72, 70, 75, 73],
+                    borderColor: '#28a745',
+                    tension: 0.1
+                }]
+            }
+        });
+    }
+
+    function initValuePieChart() {
+        const ctx = document.getElementById('valuePieChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['业务价值', '经济价值', '潜在价值'],
+                datasets: [{
+                    data: [45, 35, 20],
+                    backgroundColor: ['#007bff', '#28a745', '#17a2b8']
+                }]
+            }
+        });
+    }
+
+    function initComparisonChart() {
+        const ctx = document.getElementById('comparisonChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['当前评估', '上月评估', '行业平均'],
+                datasets: [{
+                    label: '综合得分',
+                    data: [{{ assessment.overall_score or 0 }}, 78.5, 82.3],
+                    backgroundColor: ['#007bff', '#6c757d', '#28a745']
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true, max: 100 } }
+            }
+        });
+    }
+
+    function exportCharts() {
+        // 实现图表导出功能
+        alert('图表导出功能正在开发中...');
+    }
+
+    function printCharts() {
+        window.print();
+    }
+</script>
+{% endblock %}

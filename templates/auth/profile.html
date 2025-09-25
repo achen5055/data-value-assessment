@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}个人资料 - 数据价值评估系统{% endblock %}
+
+{% block page_title %}个人资料{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <!-- 用户信息卡片 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user me-2"></i>个人信息</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="avatar-container mb-3">
+                    <div class="avatar-circle bg-primary text-white d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 80px; height: 80px; font-size: 2rem;">
+                        {{ current_user.username[0]|upper }}
+                    </div>
+                </div>
+                <h5 class="mb-1">{{ current_user.username }}</h5>
+                <p class="text-muted mb-2">{{ current_user.email }}</p>
+                <div class="mb-3">
+                    {% if current_user.is_admin %}
+                    <span class="badge bg-danger">管理员</span>
+                    {% else %}
+                    <span class="badge bg-secondary">普通用户</span>
+                    {% endif %}
+                </div>
+                <p class="small text-muted">
+                    注册时间: {{ current_user.created_at.strftime('%Y-%m-%d') }}<br>
+                    最后登录: {{ current_user.last_login.strftime('%Y-%m-%d %H:%M') if current_user.last_login else '从未登录' }}
+                </p>
+            </div>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>统计信息</h6>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        数据集数量
+                        <span class="badge bg-primary rounded-pill">{{ user_datasets_count }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        评估数量
+                        <span class="badge bg-success rounded-pill">{{ user_assessments_count }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        平均得分
+                        <span class="badge bg-info rounded-pill">{{ "%.1f"|format(user_avg_score) if user_avg_score else 0 }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        总数据量
+                        <span class="badge bg-warning rounded-pill">{{ user_total_data_size|filesizeformat }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <!-- 编辑个人信息 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-edit me-2"></i>编辑个人信息</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('auth.profile') }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="username" class="form-label">用户名</label>
+                            {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), value=current_user.username) }}
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">邮箱地址</label>
+                            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), value=current_user.email) }}
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">个人简介</label>
+                        {{ form.bio(class="form-control" + (" is-invalid" if form.bio.errors else ""), rows="3", placeholder="简单介绍一下自己...") }}
+                        {% if form.bio.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.bio.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>保存更改
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 最近活动 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>最近活动</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_activities %}
+                <div class="timeline">
+                    {% for activity in recent_activities %}
+                    <div class="timeline-item mb-3">
+                        <div class="timeline-marker">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">{{ activity.title }}</h6>
+                                <small class="text-muted">{{ activity.timestamp.strftime('%m-%d %H:%M') }}</small>
+                            </div>
+                            <p class="mb-1 small text-muted">{{ activity.description }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">暂无活动记录</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+.avatar-circle {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-weight: bold;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline-item {
+    position: relative;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -2rem;
+    top: 0.25rem;
+    color: #4e73df;
+}
+
+.timeline-content {
+    border-left: 2px solid #e3e6f0;
+    padding-left: 1rem;
+}
+</style>
+{% endblock %}

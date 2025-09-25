@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}数据集管理 - 数据价值评估系统{% endblock %}
+
+{% block page_title %}数据集管理{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-database me-2"></i>我的数据集</h5>
+                <a href="{{ url_for('data.upload') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i>上传新数据集
+                </a>
+            </div>
+            <div class="card-body">
+                {% if datasets %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>数据集名称</th>
+                                <th>文件类型</th>
+                                <th>大小</th>
+                                <th>记录数</th>
+                                <th>上传时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dataset in datasets %}
+                            <tr>
+                                <td>
+                                    <strong>{{ dataset.name }}</strong>
+                                    {% if dataset.description %}
+                                    <br><small class="text-muted">{{ dataset.description[:50] }}{% if dataset.description|length > 50 %}...{% endif %}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ dataset.file_type.upper() }}</span>
+                                </td>
+                                <td>{{ dataset.size_bytes|filesizeformat }}</td>
+                                <td>{{ dataset.row_count }}</td>
+                                <td>{{ dataset.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    {% if dataset.status == 'processed' %}
+                                    <span class="badge bg-success">已处理</span>
+                                    {% elif dataset.status == 'processing' %}
+                                    <span class="badge bg-warning">处理中</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">错误</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('data.detail', dataset_id=dataset.id) }}" class="btn btn-outline-primary" title="查看详情">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('data.edit_dataset', dataset_id=dataset.id) }}" class="btn btn-outline-secondary" title="编辑">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{{ url_for('assessment.new_assessment', dataset_id=dataset.id) }}" class="btn btn-outline-success" title="创建评估">
+                                            <i class="fas fa-chart-bar"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" title="删除" data-bs-toggle="modal" data-bs-target="#deleteModal{{ dataset.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- 删除确认模态框 -->
+                                    <div class="modal fade" id="deleteModal{{ dataset.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ dataset.id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="deleteModalLabel{{ dataset.id }}">确认删除</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    确定要删除数据集 "{{ dataset.name }}" 吗？此操作不可恢复。
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                                                    <form action="{{ url_for('data.delete', dataset_id=dataset.id) }}" method="POST" style="display: inline;">
+                                                        <button type="submit" class="btn btn-danger">确认删除</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-database fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">暂无数据集</h5>
+                    <p class="text-muted">上传您的第一个数据集开始数据价值评估</p>
+                    <a href="{{ url_for('data.upload') }}" class="btn btn-primary mt-2">
+                        <i class="fas fa-plus me-1"></i>上传数据集
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 数据集搜索功能
+        const searchInput = document.getElementById('datasetSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const rows = document.querySelectorAll('tbody tr');
+                
+                rows.forEach(row => {
+                    const datasetName = row.querySelector('td:first-child strong').textContent.toLowerCase();
+                    if (datasetName.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+        
+        // 确认删除操作
+        const deleteButtons = document.querySelectorAll('.btn-outline-danger');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const datasetId = this.getAttribute('data-dataset-id');
+                const datasetName = this.getAttribute('data-dataset-name');
+                
+                if (confirm(`确定要删除数据集 "${datasetName}" 吗？此操作不可恢复。`)) {
+                    // 这里可以添加AJAX删除逻辑
+                    console.log(`删除数据集 ${datasetId}`);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

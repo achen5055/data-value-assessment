@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}{{ assessment.name }} - 数据价值评估系统{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ assessment.name }}</h1>
+        <div>
+            <a href="{{ url_for('visualization.visualize_assessment', assessment_id=assessment.id) }}" class="btn btn-success btn-icon-split mr-2">
+                <span class="icon text-white-50">
+                    <i class="fas fa-chart-pie"></i>
+                </span>
+                <span class="text">可视化分析</span>
+            </a>
+            <a href="{{ url_for('assessment.list_assessments') }}" class="btn btn-secondary btn-icon-split">
+                <span class="icon text-white-50">
+                    <i class="fas fa-arrow-left"></i>
+                </span>
+                <span class="text">返回评估列表</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 评估概览 -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">总体评分</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% if assessment.overall_score %}
+                                {{ "%.1f"|format(assessment.overall_score) }}/100
+                                {% else %}
+                                未评分
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-star fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">评估状态</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ assessment.status_display }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">评估耗时</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% if assessment.duration %}
+                                {{ assessment.duration }} 秒
+                                {% else %}
+                                未记录
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">数据集</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800">{{ dataset.name }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-database fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 详细结果 -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">评估结果详情</h6>
+                </div>
+                <div class="card-body">
+                    {% if detailed_results and detailed_results.details %}
+                        {% for category, metrics in detailed_results.details.items() %}
+                        <div class="mb-4">
+                            <h5 class="font-weight-bold text-primary">{{ category }}</h5>
+                            {% if metrics is mapping %}
+                                {% for metric, details in metrics.items() %}
+                                <div class="card mb-2">
+                                    <div class="card-body py-2">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-3">
+                                                <strong>{{ metric }}</strong>
+                                            </div>
+                                            <div class="col-md-3">
+                                                {% if details.score is defined %}
+                                                <div class="progress">
+                                                    <div class="progress-bar bg-{{ 'success' if details.score >= 80 else 'warning' if details.score >= 60 else 'danger' }}" 
+                                                         role="progressbar" style="width: {{ details.score }}%">
+                                                        {{ "%.1f"|format(details.score) }}%
+                                                    </div>
+                                                </div>
+                                                {% else %}
+                                                <div class="text-muted">无评分数据</div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <small class="text-muted">
+                                                    {% if details.description is defined %}
+                                                        {{ details.description }}
+                                                    {% elif details.overall_score is defined %}
+                                                        总体得分: {{ details.overall_score }}
+                                                    {% else %}
+                                                        暂无描述信息
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> 该分类的数据格式不支持显示。
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> 暂无详细的评估结果数据。
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- 评估信息 -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">评估信息</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>创建时间:</strong></td>
+                            <td>{{ assessment.created_at }}</td>
+                        </tr>
+                        {% if assessment.completed_at %}
+                        <tr>
+                            <td><strong>完成时间:</strong></td>
+                            <td>{{ assessment.completed_at }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td><strong>评估类型:</strong></td>
+                            <td>{{ assessment.assessment_type_display }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>数据集:</strong></td>
+                            <td>{{ dataset.name }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">操作</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('visualization.visualize_assessment', assessment_id=assessment.id) }}" class="btn btn-success">
+                            <i class="fas fa-chart-pie"></i> 可视化分析
+                        </a>
+                        <a href="{{ url_for('data.view_dataset', dataset_id=dataset.id) }}" class="btn btn-info">
+                            <i class="fas fa-database"></i> 查看数据集
+                        </a>
+                        <form action="{{ url_for('assessment.delete_assessment', assessment_id=assessment.id) }}" method="POST" class="d-grid">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('确定要删除此评估吗？')">
+                                <i class="fas fa-trash"></i> 删除评估
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}编辑数据集 - 数据价值评估系统{% endblock %}
+
+{% block page_title %}编辑数据集{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-edit me-2"></i>编辑数据集信息</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('data.edit_dataset', dataset_id=dataset.id) }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">数据集名称</label>
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), value=dataset.name) }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">数据集描述</label>
+                        {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows="3") }}
+                        {% if form.description.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.description.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">描述数据集的内容、来源和用途</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">文件信息</label>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>文件名:</strong> {{ dataset.filename }}<br>
+                                        <strong>文件类型:</strong> {{ dataset.file_type.upper() }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>文件大小:</strong> {{ dataset.size_bytes|filesizeformat }}<br>
+                                        <strong>记录数:</strong> {{ dataset.row_count }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.is_public(class="form-check-input", checked=dataset.is_public) }}
+                            <label class="form-check-label" for="is_public">
+                                设为公开数据集（其他用户可见）
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('data.detail', dataset_id=dataset.id) }}" class="btn btn-secondary me-md-2">取消</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>保存更改
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 危险操作区域 -->
+        <div class="card mt-4 border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>危险操作</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">这些操作不可逆转，请谨慎操作。</p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>重新处理数据</h6>
+                        <p class="small text-muted">重新解析数据文件，更新数据统计信息。</p>
+                        <form action="{{ url_for('data.reprocess', dataset_id=dataset.id) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('确定要重新处理数据吗？')">
+                                <i class="fas fa-sync-alt me-1"></i>重新处理
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>删除数据集</h6>
+                        <p class="small text-muted">永久删除数据集及其所有相关评估。</p>
+                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash me-1"></i>删除数据集
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 删除确认模态框 -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">确认删除数据集</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>警告：</strong>此操作不可恢复！
+                </div>
+                <p>确定要删除数据集 "<strong>{{ dataset.name }}</strong>" 吗？</p>
+                <ul>
+                    <li>数据集文件将被永久删除</li>
+                    <li>所有相关的评估记录将被删除</li>
+                    <li>所有可视化图表将被删除</li>
+                </ul>
+                <p class="text-danger">此操作无法撤销，请谨慎操作。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <form action="{{ url_for('data.delete', dataset_id=dataset.id) }}" method="POST">
+                    <button type="submit" class="btn btn-danger">确认删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 设置描述框的初始值
+        const descriptionField = document.getElementById('description');
+        if (descriptionField) {
+            descriptionField.value = `{{ dataset.description or '' }}`;
+        }
+
+        // 表单验证
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const nameField = document.getElementById('name');
+                if (!nameField.value.trim()) {
+                    e.preventDefault();
+                    showAlert('请输入数据集名称', 'warning');
+                    nameField.focus();
+                    return false;
+                }
+            });
+        }
+
+        function showAlert(message, type = 'info') {
+            // 创建警告消息
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-info-circle me-2"></i>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // 插入到表单前面
+            const form = document.querySelector('form');
+            if (form) {
+                form.parentNode.insertBefore(alertDiv, form);
+                
+                // 自动隐藏
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        const bsAlert = new bootstrap.Alert(alertDiv);
+                        bsAlert.close();
+                    }
+                }, 5000);
+            }
+        }
+    });
+</script>
+{% endblock %}

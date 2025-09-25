@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}创建评估 - 数据价值评估系统{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">创建评估</h1>
+        <a href="{{ url_for('data.list_datasets') }}" class="btn btn-secondary btn-icon-split">
+            <span class="icon text-white-50">
+                <i class="fas fa-arrow-left"></i>
+            </span>
+            <span class="text">返回数据集</span>
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">评估配置</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 正在评估数据集: <strong>{{ dataset.name }}</strong>
+                        <br>文件类型: {{ dataset.file_type|upper }} | 数据规模: {{ dataset.row_count }} 行 × {{ dataset.column_count }} 列
+                    </div>
+
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-group">
+                            {{ form.name.label(class="form-control-label") }}
+                            {{ form.name(class="form-control", placeholder="例如: 销售数据质量评估") }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.description.label(class="form-control-label") }}
+                            {{ form.description(class="form-control", rows=4, placeholder="描述评估的目的和重点关注的方面...") }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-control-label">选择评估规则</label>
+                            <div class="card">
+                                <div class="card-body">
+                                    {% if form.rules.choices %}
+                                        {% for rule_id, rule_name in form.rules.choices %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="rules" value="{{ rule_id }}" id="rule{{ rule_id }}">
+                                            <label class="form-check-label" for="rule{{ rule_id }}">
+                                                {{ rule_name }}
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-exclamation-triangle"></i> 您还没有创建任何数据质量规则。
+                                            <a href="{{ url_for('assessment.new_rule') }}" class="alert-link">创建第一个规则</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if form.rules.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.rules.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-play-circle"></i> 开始评估
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">评估说明</h6>
+                </div>
+                <div class="card-body">
+                    <h6 class="font-weight-bold text-primary">评估类型:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> 数据质量评估</li>
+                        <li><i class="fas fa-check text-success"></i> 数据价值评估</li>
+                        <li><i class="fas fa-check text-success"></i> 业务价值分析</li>
+                    </ul>
+                    
+                    <h6 class="font-weight-bold text-primary mt-3">评估指标:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-ruler text-info"></i> 完整性检查</li>
+                        <li><i class="fas fa-ruler text-info"></i> 准确性验证</li>
+                        <li><i class="fas fa-ruler text-info"></i> 一致性分析</li>
+                        <li><i class="fas fa-ruler text-info"></i> 时效性评估</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

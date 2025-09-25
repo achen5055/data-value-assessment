@@ -1,0 +1,192 @@
+/* 全局样式 */
+:root {
+    --primary-color: #4e73df;
+    --secondary-color: #6c757d;
+    --success-color: #1cc88a;
+    --info-color: #36b9cc;
+    --warning-color: #f6c23e;
+    --danger-color: #e74a3b;
+    --light-color: #f8f9fc;
+    --dark-color: #5a5c69;
+}
+
+body {
+    font-family: 'Nunito', 'Segoe UI', Roboto, Arial, sans-serif;
+    background-color: #f8f9fc;
+    color: #333;
+}
+
+/* 导航栏样式 */
+.navbar {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+/* 卡片样式 */
+.card {
+    border: none;
+    border-radius: 0.35rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    padding: 0.75rem 1.25rem;
+}
+
+/* 按钮样式 */
+.btn {
+    border-radius: 0.35rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #2e59d9;
+    border-color: #2653d4;
+}
+
+/* 表格样式 */
+.table {
+    color: #333;
+}
+
+.table thead th {
+    background-color: #f8f9fc;
+    border-bottom: 2px solid #e3e6f0;
+    font-weight: 700;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(78, 115, 223, 0.05);
+}
+
+/* 表单样式 */
+.form-control {
+    border-radius: 0.35rem;
+    border: 1px solid #d1d3e2;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.form-control:focus {
+    border-color: #bac8f3;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+/* 徽章样式 */
+.badge {
+    font-weight: 600;
+    padding: 0.35em 0.65em;
+    border-radius: 0.35rem;
+}
+
+/* 数据集卡片 */
+.dataset-card {
+    transition: transform 0.2s;
+}
+
+.dataset-card:hover {
+    transform: translateY(-5px);
+}
+
+.dataset-card .card-img-top {
+    height: 120px;
+    object-fit: cover;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 评估结果样式 */
+.score-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+}
+
+.score-excellent {
+    background-color: #1cc88a;
+}
+
+.score-good {
+    background-color: #4e73df;
+}
+
+.score-average {
+    background-color: #f6c23e;
+}
+
+.score-poor {
+    background-color: #e74a3b;
+}
+
+/* 图表容器 */
+.chart-container {
+    height: 300px;
+    margin-bottom: 1.5rem;
+}
+
+/* 加载动画 */
+.loading-spinner {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    border: 0.25em solid rgba(78, 115, 223, 0.25);
+    border-right-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spinner-border 0.75s linear infinite;
+}
+
+@keyframes spinner-border {
+    to { transform: rotate(360deg); }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 250px;
+    }
+    
+    .score-circle {
+        width: 80px;
+        height: 80px;
+        font-size: 1.5rem;
+    }
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}创建数据质量规则 - 数据价值评估系统{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">创建数据质量规则</h1>
+        <a href="{{ url_for('assessment.list_rules') }}" class="btn btn-secondary btn-icon-split">
+            <span class="icon text-white-50">
+                <i class="fas fa-arrow-left"></i>
+            </span>
+            <span class="text">返回规则列表</span>
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">规则配置</h6>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-group">
+                            {{ form.name.label(class="form-control-label") }}
+                            {{ form.name(class="form-control", placeholder="例如: 完整性检查规则") }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.description.label(class="form-control-label") }}
+                            {{ form.description(class="form-control", rows=3, placeholder="描述规则的用途和检查内容...") }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.rule_type.label(class="form-control-label") }}
+                            {{ form.rule_type(class="form-control") }}
+                            {% if form.rule_type.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.rule_type.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h6 class="m-0 font-weight-bold text-primary">规则条件</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    {{ form.column.label(class="form-control-label") }}
+                                    {{ form.column(class="form-control", placeholder="例如: age, price, status") }}
+                                    <small class="form-text text-muted">要检查的数据列名称</small>
+                                </div>
+
+                                <div class="form-group">
+                                    {{ form.condition.label(class="form-control-label") }}
+                                    {{ form.condition(class="form-control") }}
+                                    <small class="form-text text-muted">选择检查条件</small>
+                                </div>
+
+                                <div class="form-group">
+                                    {{ form.value.label(class="form-control-label") }}
+                                    {{ form.value(class="form-control", placeholder="例如: 18, 100.0, active") }}
+                                    <small class="form-text text-muted">比较值或条件值</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> 保存规则
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">规则类型说明</h6>
+                </div>
+                <div class="card-body">
+                    <h6 class="font-weight-bold text-primary">数据质量规则:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> 完整性检查</li>
+                        <li><i class="fas fa-check text-success"></i> 准确性验证</li>
+                        <li><i class="fas fa-check text-success"></i> 一致性分析</li>
+                        <li><i class="fas fa-check text-success"></i> 时效性评估</li>
+                    </ul>
+                    
+                    <h6 class="font-weight-bold text-primary mt-3">支持的条件:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-equals text-info"></i> 等于 (=)</li>
+                        <li><i class="fas fa-not-equal text-info"></i> 不等于 (!=)</li>
+                        <li><i class="fas fa-greater-than text-info"></i> 大于 (>)</li>
+                        <li><i class="fas fa-less-than text-info"></i> 小于 (<)</li>
+                        <li><i class="fas fa-check text-info"></i> 包含 (contains)</li>
+                        <li><i class="fas fa-ban text-info"></i> 不包含 (not contains)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

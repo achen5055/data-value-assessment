@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}帮助文档 - 数据价值评估系统{% endblock %}
+
+{% block page_title %}帮助文档{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title">使用指南</h3>
+                
+                <div class="accordion" id="helpAccordion">
+                    <!-- 快速入门 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#quickStart">
+                                <i class="fas fa-rocket me-2"></i>快速入门
+                            </button>
+                        </h2>
+                        <div id="quickStart" class="accordion-collapse collapse show" data-bs-parent="#helpAccordion">
+                            <div class="accordion-body">
+                                <h5>第一步：注册和登录</h5>
+                                <p>首次使用需要注册账号，填写用户名、邮箱和密码即可完成注册。</p>
+                                
+                                <h5>第二步：上传数据集</h5>
+                                <p>支持上传CSV、Excel和JSON格式的数据文件。上传时需要提供数据集名称和描述。</p>
+                                
+                                <h5>第三步：创建评估规则</h5>
+                                <p>在"质量规则"页面创建数据质量评估规则，定义数据验证条件。</p>
+                                
+                                <h5>第四步：运行评估</h5>
+                                <p>选择数据集和规则，开始数据价值评估。</p>
+                                
+                                <h5>第五步：查看结果</h5>
+                                <p>查看详细的评估报告和可视化图表。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据集管理 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#datasetManagement">
+                                <i class="fas fa-database me-2"></i>数据集管理
+                            </button>
+                        </h2>
+                        <div id="datasetManagement" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                            <div class="accordion-body">
+                                <h5>支持的文件格式</h5>
+                                <ul>
+                                    <li><strong>CSV</strong> - 逗号分隔值文件</li>
+                                    <li><strong>Excel</strong> - .xlsx 或 .xls 格式</li>
+                                    <li><strong>JSON</strong> - JavaScript对象表示法</li>
+                                </ul>
+                                
+                                <h5>文件大小限制</h5>
+                                <p>单个文件最大支持16MB。</p>
+                                
+                                <h5>数据预览</h5>
+                                <p>上传后可以查看数据集的前100行数据预览。</p>
+                                
+                                <h5>数据集信息</h5>
+                                <p>系统会自动分析数据集的以下信息：</p>
+                                <ul>
+                                    <li>行数和列数</li>
+                                    <li>文件大小</li>
+                                    <li>列数据类型</li>
+                                    <li>缺失值统计</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 评估规则 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#assessmentRules">
+                                <i class="fas fa-check-circle me-2"></i>评估规则
+                            </button>
+                        </h2>
+                        <div id="assessmentRules" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                            <div class="accordion-body">
+                                <h5>规则类型</h5>
+                                <ul>
+                                    <li><strong>完整性规则</strong> - 检查数据是否完整</li>
+                                    <li><strong>一致性规则</strong> - 检查数据格式是否一致</li>
+                                    <li><strong>准确性规则</strong> - 验证数据准确性</li>
+                                    <li><strong>时效性规则</strong> - 检查数据时间有效性</li>
+                                    <li><strong>唯一性规则</strong> - 验证数据唯一性</li>
+                                    <li><strong>有效性规则</strong> - 检查数据是否符合业务规则</li>
+                                </ul>
+                                
+                                <h5>条件操作符</h5>
+                                <ul>
+                                    <li><strong>不为空</strong> - 检查字段是否有值</li>
+                                    <li><strong>唯一值</strong> - 检查字段值是否唯一</li>
+                                    <li><strong>范围内</strong> - 检查数值是否在指定范围内</li>
+                                    <li><strong>匹配模式</strong> - 使用正则表达式匹配</li>
+                                    <li><strong>等于/不等于</strong> - 精确匹配检查</li>
+                                    <li><strong>大于/小于</strong> - 数值比较</li>
+                                    <li><strong>在列表中</strong> - 检查值是否在指定列表中</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 评估结果 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#assessmentResults">
+                                <i class="fas fa-chart-bar me-2"></i>评估结果解读
+                            </button>
+                        </h2>
+                        <div id="assessmentResults" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                            <div class="accordion-body">
+                                <h5>评分标准</h5>
+                                <p>所有评分均采用百分制：</p>
+                                <ul>
+                                    <li><span class="badge bg-success">90-100</span> 优秀</li>
+                                    <li><span class="badge bg-primary">70-89</span> 良好</li>
+                                    <li><span class="badge bg-warning">50-69</span> 一般</li>
+                                    <li><span class="badge bg-danger">0-49</span> 较差</li>
+                                </ul>
+                                
+                                <h5>评估指标</h5>
+                                <ul>
+                                    <li><strong>数据质量得分</strong> - 综合质量评估</li>
+                                    <li><strong>完整性得分</strong> - 数据完整程度</li>
+                                    <li><strong>一致性得分</strong> - 数据格式一致性</li>
+                                    <li><strong>准确性得分</strong> - 数据准确程度</li>
+                                    <li><strong>时效性得分</strong> - 数据时间有效性</li>
+                                    <li><strong>业务价值得分</strong> - 对业务的价值贡献</li>
+                                    <li><strong>综合价值得分</strong> - 整体价值评估</li>
+                                </ul>
+                                
+                                <h5>可视化图表</h5>
+                                <p>系统提供多种可视化图表帮助理解评估结果：</p>
+                                <ul>
+                                    <li>雷达图 - 展示多维度评分</li>
+                                    <li>仪表盘 - 显示综合得分</li>
+                                    <li>柱状图 - 对比不同指标</li>
+                                    <li>饼图 - 显示比例分布</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 常见问题 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq">
+                                <i class="fas fa-question-circle me-2"></i>常见问题
+                            </button>
+                        </h2>
+                        <div id="faq" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                            <div class="accordion-body">
+                                <h5>Q: 支持哪些数据文件格式？</h5>
+                                <p>A: 目前支持CSV、Excel和JSON格式。</p>
+                                
+                                <h5>Q: 文件大小有限制吗？</h5>
+                                <p>A: 是的，单个文件最大支持16MB。</p>
+                                
+                                <h5>Q: 如何创建数据质量规则？</h5>
+                                <p>A: 在"质量规则"页面，选择规则类型、列名、条件和值即可创建。</p>
+                                
+                                <h5>Q: 评估需要多长时间？</h5>
+                                <p>A: 评估时间取决于数据集大小和规则数量，通常几秒到几分钟。</p>
+                                
+                                <h5>Q: 数据安全如何保障？</h5>
+                                <p>A: 所有上传的数据仅对用户本人可见，系统采用加密存储和传输。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-life-ring me-2"></i>技术支持</h5>
+            </div>
+            <div class="card-body">
+                <p>如果您遇到问题或需要帮助，请通过以下方式联系我们：</p>
+                
+                <div class="mb-3">
+                    <strong><i class="fas fa-envelope me-2"></i>邮箱支持:</strong><br>
+                    <a href="mailto:support@example.com">support@example.com</a>
+                </div>
+                
+                <div class="mb-3">
+                    <strong><i class="fas fa-book me-2"></i>文档中心:</strong><br>
+                    <a href="#">查看完整文档</a>
+                </div>
+                
+                <div class="mb-3">
+                    <strong><i class="fas fa-bug me-2"></i>报告问题:</strong><br>
+                    <a href="#">提交Bug报告</a>
+                </div>
+                
+                <div class="mb-3">
+                    <strong><i class="fas fa-lightbulb me-2"></i>功能建议:</strong><br>
+                    <a href="#">提交功能建议</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>注意事项</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-shield-alt me-2"></i>数据安全</h6>
+                    <p class="mb-2">请勿上传包含敏感个人信息的数据。</p>
+                </div>
+                
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-database me-2"></i>数据备份</h6>
+                    <p class="mb-2">建议定期备份重要数据。</p>
+                </div>
+                
+                <div class="alert alert-success">
+                    <h6><i class="fas fa-sync-alt me-2"></i>系统更新</h6>
+                    <p class="mb-0">系统会定期更新，请关注更新通知。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 自动展开第一个accordion项
+    document.addEventListener('DOMContentLoaded', function() {
+        var firstAccordion = new bootstrap.Collapse(document.getElementById('quickStart'));
+    });
+</script>
+{% endblock %}

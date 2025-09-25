@@ -1,0 +1,438 @@
+{% extends "base.html" %}
+
+{% block title %}系统设置 - 数据价值评估系统{% endblock %}
+
+{% block page_title %}系统设置{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-3">
+        <!-- 设置导航 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">设置选项</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="#account" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+                        <i class="fas fa-user-cog me-2"></i>账户设置
+                    </a>
+                    <a href="#security" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-shield-alt me-2"></i>安全设置
+                    </a>
+                    <a href="#notifications" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-bell me-2"></i>通知设置
+                    </a>
+                    <a href="#preferences" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-cog me-2"></i>偏好设置
+                    </a>
+                    {% if current_user.is_admin %}
+                    <a href="#admin" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-tools me-2"></i>管理设置
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-9">
+        <div class="tab-content">
+            <!-- 账户设置 -->
+            <div class="tab-pane fade show active" id="account">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user-cog me-2"></i>账户设置</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('auth.settings') }}">
+                            {{ account_form.hidden_tag() }}
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">显示语言</label>
+                                    {{ account_form.language(class="form-select") }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">时区设置</label>
+                                    {{ account_form.timezone(class="form-select") }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">日期格式</label>
+                                {{ account_form.date_format(class="form-select") }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">每页显示数量</label>
+                                {{ account_form.items_per_page(class="form-select") }}
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    {{ account_form.email_notifications(class="form-check-input", checked=current_user.email_notifications) }}
+                                    <label class="form-check-label" for="email_notifications">
+                                        接收邮件通知
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" name="account_settings" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>保存账户设置
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 安全设置 -->
+            <div class="tab-pane fade" id="security">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>安全设置</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- 修改密码 -->
+                        <div class="mb-4">
+                            <h6 class="border-bottom pb-2">修改密码</h6>
+                            <form method="POST" action="{{ url_for('auth.settings') }}">
+                                {{ password_form.hidden_tag() }}
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">当前密码</label>
+                                        {{ password_form.current_password(class="form-control" + (" is-invalid" if password_form.current_password.errors else "")) }}
+                                        {% if password_form.current_password.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in password_form.current_password.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">新密码</label>
+                                        {{ password_form.new_password(class="form-control" + (" is-invalid" if password_form.new_password.errors else "")) }}
+                                        {% if password_form.new_password.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in password_form.new_password.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">确认新密码</label>
+                                        {{ password_form.confirm_password(class="form-control" + (" is-invalid" if password_form.confirm_password.errors else "")) }}
+                                        {% if password_form.confirm_password.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in password_form.confirm_password.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" name="change_password" class="btn btn-warning">
+                                        <i class="fas fa-key me-1"></i>修改密码
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- 登录安全 -->
+                        <div class="mb-4">
+                            <h6 class="border-bottom pb-2">登录安全</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="twoFactorAuth">
+                                        <label class="form-check-label" for="twoFactorAuth">
+                                            启用双重认证
+                                        </label>
+                                    </div>
+                                    <p class="small text-muted">启用后，登录时需要输入验证码</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="sessionTimeout" checked>
+                                        <label class="form-check-label" for="sessionTimeout">
+                                            自动登出保护
+                                        </label>
+                                    </div>
+                                    <p class="small text-muted">闲置30分钟后自动登出</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 登录记录 -->
+                        <div>
+                            <h6 class="border-bottom pb-2">最近登录记录</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>时间</th>
+                                            <th>IP地址</th>
+                                            <th>地点</th>
+                                            <th>状态</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>2025-09-25 08:30</td>
+                                            <td>192.168.1.100</td>
+                                            <td>北京</td>
+                                            <td><span class="badge bg-success">成功</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2025-09-24 15:20</td>
+                                            <td>192.168.1.101</td>
+                                            <td>上海</td>
+                                            <td><span class="badge bg-success">成功</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 通知设置 -->
+            <div class="tab-pane fade" id="notifications">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-bell me-2"></i>通知设置</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('auth.settings') }}">
+                            {{ notification_form.hidden_tag() }}
+                            
+                            <div class="mb-4">
+                                <h6 class="border-bottom pb-2">评估通知</h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check form-switch">
+                                            {{ notification_form.assessment_complete(class="form-check-input", checked=true) }}
+                                            <label class="form-check-label">
+                                                评估完成通知
+                                            </label>
+                                        </div>
+                                        <p class="small text-muted">评估任务完成时发送通知</p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check form-switch">
+                                            {{ notification_form.assessment_error(class="form-check-input", checked=true) }}
+                                            <label class="form-check-label">
+                                                评估错误通知
+                                            </label>
+                                        </div>
+                                        <p class="small text-muted">评估任务失败时发送通知</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h6 class="border-bottom pb-2">系统通知</h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check form-switch">
+                                            {{ notification_form.system_updates(class="form-check-input", checked=true) }}
+                                            <label class="form-check-label">
+                                                系统更新通知
+                                            </label>
+                                        </div>
+                                        <p class="small text-muted">系统功能更新和维护通知</p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check form-switch">
+                                            {{ notification_form.security_alerts(class="form-check-input", checked=true) }}
+                                            <label class="form-check-label">
+                                                安全警报
+                                            </label>
+                                        </div>
+                                        <p class="small text-muted">账户安全相关的重要通知</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" name="notification_settings" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>保存通知设置
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 偏好设置 -->
+            <div class="tab-pane fade" id="preferences">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-cog me-2"></i>偏好设置</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('auth.settings') }}">
+                            {{ preference_form.hidden_tag() }}
+                            
+                            <div class="mb-4">
+                                <h6 class="border-bottom pb-2">界面设置</h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">主题模式</label>
+                                        {{ preference_form.theme(class="form-select") }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">导航样式</label>
+                                        {{ preference_form.navigation_style(class="form-select") }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h6 class="border-bottom pb-2">数据设置</h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check form-switch">
+                                            {{ preference_form.auto_save(class="form-check-input", checked=true) }}
+                                            <label class="form-check-label">
+                                                自动保存
+                                            </label>
+                                        </div>
+                                        <p class="small text-muted">编辑时自动保存更改</p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check form-switch">
+                                            {{ preference_form.confirm_delete(class="form-check-input", checked=true) }}
+                                            <label class="form-check-label">
+                                                删除确认
+                                            </label>
+                                        </div>
+                                        <p class="small text-muted">删除操作前要求确认</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" name="preference_settings" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>保存偏好设置
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 管理设置（仅管理员可见） -->
+            {% if current_user.is_admin %}
+            <div class="tab-pane fade" id="admin">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-tools me-2"></i>管理设置</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>警告：</strong>这些设置会影响整个系统，请谨慎操作。
+                        </div>
+
+                        <form method="POST" action="{{ url_for('auth.settings') }}">
+                            {{ admin_form.hidden_tag() }}
+                            
+                            <div class="mb-4">
+                                <h6 class="border-bottom pb-2">系统配置</h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">最大文件大小</label>
+                                        {{ admin_form.max_file_size(class="form-select") }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">会话超时时间</label>
+                                        {{ admin_form.session_timeout(class="form-select") }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h6 class="border-bottom pb-2">用户管理</h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check form-switch">
+                                            {{ admin_form.allow_registration(class="form-check-input", checked=true) }}
+                                            <label class="form-check-label">
+                                                允许用户注册
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check form-switch">
+                                            {{ admin_form.email_verification(class="form-check-input", checked=true) }}
+                                            <label class="form-check-label">
+                                                邮箱验证
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" name="admin_settings" class="btn btn-danger">
+                                    <i class="fas fa-save me-1"></i>保存管理设置
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 激活第一个选项卡
+        const firstTab = document.querySelector('.list-group-item.active');
+        if (firstTab) {
+            const target = firstTab.getAttribute('href');
+            const tabPane = document.querySelector(target);
+            if (tabPane) {
+                tabPane.classList.add('show', 'active');
+            }
+        }
+
+        // 选项卡切换事件
+        const tabLinks = document.querySelectorAll('[data-bs-toggle="list"]');
+        tabLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 移除所有激活状态
+                tabLinks.forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(pane => {
+                    pane.classList.remove('show', 'active');
+                });
+
+                // 添加当前激活状态
+                this.classList.add('active');
+                const targetPane = document.querySelector(this.getAttribute('href'));
+                if (targetPane) {
+                    targetPane.classList.add('show', 'active');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

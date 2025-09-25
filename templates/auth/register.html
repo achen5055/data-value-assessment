@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}注册 - 数据价值评估系统{% endblock %}
+
+{% block page_title %}用户注册{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <h3 class="card-title text-primary">创建新账号</h3>
+                    <p class="text-muted">请填写以下信息完成注册</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.register') }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="fas fa-user me-1"></i>用户名
+                        </label>
+                        {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), placeholder="请输入用户名（3-20个字符）") }}
+                        {% if form.username.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.username.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">用户名长度3-20个字符，只能包含字母、数字和下划线</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope me-1"></i>邮箱地址
+                        </label>
+                        {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="请输入邮箱地址") }}
+                        {% if form.email.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.email.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock me-1"></i>密码
+                        </label>
+                        {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="请输入密码（至少8个字符）") }}
+                        {% if form.password.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">密码长度至少8个字符</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">
+                            <i class="fas fa-lock me-1"></i>确认密码
+                        </label>
+                        {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), placeholder="请再次输入密码") }}
+                        {% if form.confirm_password.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.confirm_password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ form.agree_terms(class="form-check-input") }}
+                        <label class="form-check-label" for="agree_terms">
+                            我同意 <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">服务条款</a> 和 <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">隐私政策</a>
+                        </label>
+                        {% if form.agree_terms.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.agree_terms.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>立即注册
+                        </button>
+                    </div>
+                </form>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show mt-3" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>{{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <p class="mb-2">已有账号？</p>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-sign-in-alt me-2"></i>立即登录
+                    </a>
+                </div>
+
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('main.index') }}" class="text-muted text-decoration-none">
+                        <i class="fas fa-arrow-left me-1"></i>返回首页
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 服务条款模态框 -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">服务条款</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. 接受条款</h6>
+                <p>通过访问和使用数据价值评估系统，您同意遵守本服务条款。</p>
+                
+                <h6>2. 服务描述</h6>
+                <p>本系统提供数据价值评估服务，包括数据质量分析、价值计算和可视化展示。</p>
+                
+                <h6>3. 用户责任</h6>
+                <p>用户需确保上传的数据不侵犯第三方权益，不包含违法或不当内容。</p>
+                
+                <h6>4. 隐私保护</h6>
+                <p>我们承诺保护用户隐私，不会将用户数据用于商业目的或与第三方共享。</p>
+                
+                <h6>5. 服务变更</h6>
+                <p>我们保留随时修改或终止服务的权利，恕不另行通知。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 隐私政策模态框 -->
+<div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="privacyModalLabel">隐私政策</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. 信息收集</h6>
+                <p>我们收集用户注册信息和上传的数据文件，用于提供评估服务。</p>
+                
+                <h6>2. 信息使用</h6>
+                <p>用户信息仅用于系统功能实现，不会用于其他商业目的。</p>
+                
+                <h6>3. 数据安全</h6>
+                <p>我们采取合理措施保护用户数据安全，但无法保证绝对安全。</p>
+                
+                <h6>4. Cookie使用</h6>
+                <p>我们使用Cookie来改善用户体验和系统功能。</p>
+                
+                <h6>5. 政策变更</h6>
+                <p>隐私政策可能随时更新，请定期查看最新版本。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 自动聚焦到用户名输入框
+        const usernameInput = document.getElementById('username');
+        if (usernameInput) {
+            usernameInput.focus();
+        }
+
+        // 实时密码强度检查
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm_password');
+        
+        if (passwordInput) {
+            passwordInput.addEventListener('input', checkPasswordStrength);
+        }
+        
+        if (confirmPasswordInput) {
+            confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+        }
+
+        function checkPasswordStrength() {
+            const password = passwordInput.value;
+            let strength = 0;
+            
+            if (password.length >= 6) strength++;
+            if (password.match(/[a-z]/)) strength++;
+            if (password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+            
+            // 可以添加密码强度显示逻辑
+        }
+
+        function checkPasswordMatch() {
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                confirmPasswordInput.classList.add('is-invalid');
+            } else {
+                confirmPasswordInput.classList.remove('is-invalid');
+            }
+        }
+
+        // 表单验证
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const agreeTerms = document.getElementById('agree_terms');
+                
+                if (!agreeTerms.checked) {
+                    e.preventDefault();
+                    showAlert('请同意服务条款和隐私政策', 'warning');
+                    return false;
+                }
+            });
+        }
+
+        function showAlert(message, type = 'info') {
+            // 移除现有的警告
+            const existingAlerts = document.querySelectorAll('.alert-dismissible');
+            existingAlerts.forEach(alert => alert.remove());
+
+            // 创建新的警告
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-info-circle me-2"></i>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const form = document.querySelector('form');
+            if (form) {
+                form.parentNode.insertBefore(alertDiv, form.nextSibling);
+                
+                // 自动隐藏警告
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        const bsAlert = new bootstrap.Alert(alertDiv);
+                        bsAlert.close();
+                    }
+                }, 5000);
+            }
+        }
+    });
+</script>
+{% endblock %}

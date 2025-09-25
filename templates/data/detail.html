@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}{{ dataset.name }} - 数据价值评估系统{% endblock %}
+
+{% block page_title %}数据集详情{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <!-- 数据集基本信息 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>基本信息</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>数据集名称:</strong><br>
+                    {{ dataset.name }}
+                </div>
+                {% if dataset.description %}
+                <div class="mb-3">
+                    <strong>描述:</strong><br>
+                    {{ dataset.description }}
+                </div>
+                {% endif %}
+                <div class="mb-3">
+                    <strong>文件类型:</strong><br>
+                    <span class="badge bg-secondary">{{ dataset.file_type.upper() }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>文件大小:</strong><br>
+                    {{ dataset.size_bytes|filesizeformat }}
+                </div>
+                <div class="mb-3">
+                    <strong>记录数:</strong><br>
+                    {{ dataset.row_count }} 行
+                </div>
+                <div class="mb-3">
+                    <strong>列数:</strong><br>
+                    {{ dataset.column_count }} 列
+                </div>
+                <div class="mb-3">
+                    <strong>上传时间:</strong><br>
+                    {{ dataset.created_at.strftime('%Y-%m-%d %H:%M') }}
+                </div>
+                <div class="mb-3">
+                    <strong>状态:</strong><br>
+                    {% if dataset.status == 'processed' %}
+                    <span class="badge bg-success">已处理</span>
+                    {% elif dataset.status == 'processing' %}
+                    <span class="badge bg-warning">处理中</span>
+                    {% else %}
+                    <span class="badge bg-danger">错误</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 快速操作 -->
+
+    </div>
+
+    <div class="col-md-8">
+        <!-- 数据预览 -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-table me-2"></i>数据预览</h5>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-secondary active" data-rows="10">前10行</button>
+                    <button class="btn btn-outline-secondary" data-rows="50">前50行</button>
+                    <button class="btn btn-outline-secondary" data-rows="100">前100行</button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if preview_data and preview_data|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered table-hover" id="dataPreview">
+                        <thead class="table-light">
+                            <tr>
+                                {% if preview_data and preview_data|length > 0 %}
+                                    {% for column in preview_data[0].keys() %}
+                                    <th>{{ column }}</th>
+                                    {% endfor %}
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody id="previewTableBody">
+                            {% for row in preview_data %}
+                            <tr class="data-row" data-row-index="{{ loop.index0 }}">
+                                {% for value in row.values() %}
+                                <td>{{ value if value is not none else '<span class="text-muted">NULL</span>'|safe }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-2 text-muted small">
+                    显示前 {{ preview_data|length }} 行数据，共 {{ dataset.row_count }} 行
+                </div>
+                {% elif preview_data and preview_data|length == 0 %}
+                <div class="text-center py-4">
+                    <i class="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
+                    <p class="text-muted">数据预览为空，可能是数据文件格式问题</p>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
+                    <p class="text-muted">数据预览暂不可用</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 数据统计信息 -->
+
+    </div>
+</div>
+
+<!-- 相关评估 -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>相关评估</h5>
+                <a href="{{ url_for('assessment.new_assessment', dataset_id=dataset.id) }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i>新建评估
+                </a>
+            </div>
+            <div class="card-body">
+                {% if assessments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>评估名称</th>
+                                <th>评估类型</th>
+                                <th>创建时间</th>
+                                <th>状态</th>
+                                <th>得分</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for assessment in assessments %}
+                            <tr>
+                                <td>{{ assessment.name }}</td>
+                                <td>
+                                    <span class="badge bg-info">{{ assessment.assessment_type }}</span>
+                                </td>
+                                <td>{{ assessment.created_at.strftime('%Y-%m-%d %H:%M') if assessment.created_at else 'N/A' }}</td>
+                                <td>
+                                    {% if assessment.status == 'completed' %}
+                                    <span class="badge bg-success">已完成</span>
+                                    {% elif assessment.status == 'running' %}
+                                    <span class="badge bg-warning">进行中</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">失败</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if assessment.overall_score is not none %}
+                                    <span class="badge bg-primary">{{ "%.1f"|format(assessment.overall_score) }}</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">未评分</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('assessment.view_assessment', assessment_id=assessment.id) }}" class="btn btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('visualization.visualize_assessment', assessment_id=assessment.id) }}" class="btn btn-outline-info">
+                                            <i class="fas fa-chart-bar"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-clipboard-list fa-2x text-muted mb-2"></i>
+                    <p class="text-muted">暂无相关评估</p>
+                    <a href="{{ url_for('assessment.new_assessment', dataset_id=dataset.id) }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>创建第一个评估
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 数据预览行数切换
+        const previewButtons = document.querySelectorAll('[data-rows]');
+        previewButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const rows = parseInt(this.getAttribute('data-rows'));
+                
+                // 更新按钮状态
+                previewButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 显示/隐藏数据行
+                const dataRows = document.querySelectorAll('.data-row');
+                dataRows.forEach((row, index) => {
+                    if (index < rows) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // 默认显示前10行
+        document.querySelector('[data-rows="10"]').click();
+
+        // 图表初始化
+        {% if dataset.stats %}
+        // 数据类型分布图表
+        const typeCtx = document.getElementById('typeChart').getContext('2d');
+        const typeChart = new Chart(typeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['数值型', '文本型', '日期型', '其他'],
+                datasets: [{
+                    data: [40, 35, 15, 10],
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#858796']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // 缺失值统计图表
+        const missingCtx = document.getElementById('missingChart').getContext('2d');
+        const missingChart = new Chart(missingCtx, {
+            type: 'bar',
+            data: {
+                labels: ['列1', '列2', '列3', '列4', '列5'],
+                datasets: [{
+                    label: '缺失值数量',
+                    data: [5, 12, 3, 8, 2],
+                    backgroundColor: '#e74a3b'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        {% endif %}
+    });
+</script>
+{% endblock %}

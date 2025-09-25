@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}登录 - 数据价值评估系统{% endblock %}
+
+{% block page_title %}用户登录{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <h3 class="card-title text-primary">欢迎回来</h3>
+                    <p class="text-muted">请输入您的账号信息登录系统</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.login') }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="fas fa-user me-1"></i>用户名
+                        </label>
+                        {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), placeholder="请输入用户名") }}
+                        {% if form.username.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.username.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock me-1"></i>密码
+                        </label>
+                        {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="请输入密码") }}
+                        {% if form.password.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ form.remember_me(class="form-check-input") }}
+                        <label class="form-check-label" for="remember_me">
+                            记住我
+                        </label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>登录
+                        </button>
+                    </div>
+                </form>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show mt-3" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>{{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <p class="mb-2">还没有账号？</p>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-user-plus me-2"></i>立即注册
+                    </a>
+                </div>
+
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('main.index') }}" class="text-muted text-decoration-none">
+                        <i class="fas fa-arrow-left me-1"></i>返回首页
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <div class="alert alert-light border">
+                <h6 class="mb-2">测试账号</h6>
+                <p class="mb-1"><strong>用户名:</strong> admin</p>
+                <p class="mb-0"><strong>密码:</strong> admin123</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 自动聚焦到用户名输入框
+        const usernameInput = document.getElementById('username');
+        if (usernameInput) {
+            usernameInput.focus();
+        }
+
+        // 表单验证
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value.trim();
+                
+                if (!username) {
+                    e.preventDefault();
+                    showAlert('请输入用户名', 'warning');
+                    return false;
+                }
+                
+                if (!password) {
+                    e.preventDefault();
+                    showAlert('请输入密码', 'warning');
+                    return false;
+                }
+            });
+        }
+
+        function showAlert(message, type = 'info') {
+            // 移除现有的警告
+            const existingAlerts = document.querySelectorAll('.alert-dismissible');
+            existingAlerts.forEach(alert => alert.remove());
+
+            // 创建新的警告
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-info-circle me-2"></i>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const form = document.querySelector('form');
+            if (form) {
+                form.parentNode.insertBefore(alertDiv, form.nextSibling);
+                
+                // 自动隐藏警告
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        const bsAlert = new bootstrap.Alert(alertDiv);
+                        bsAlert.close();
+                    }
+                }, 5000);
+            }
+        }
+    });
+</script>
+{% endblock %}

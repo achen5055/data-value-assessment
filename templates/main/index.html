@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - 数据价值评估系统{% endblock %}
+
+{% block page_title %}欢迎使用数据价值评估系统{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">数据价值评估系统</h2>
+                <p class="card-text">
+                    数据价值评估系统是一个专业的数据分析工具，帮助您评估数据集的质量、完整性、一致性、准确性和业务价值。
+                    通过科学的评估方法，为您的数据资产提供全面的价值分析。
+                </p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('data.upload_dataset') }}" class="btn btn-primary me-md-2">
+                        <i class="fas fa-upload me-1"></i>上传数据集
+                    </a>
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-tachometer-alt me-1"></i>进入仪表盘
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary me-md-2">
+                        <i class="fas fa-sign-in-alt me-1"></i>登录
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-user-plus me-1"></i>注册
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title"><i class="fas fa-chart-pie me-2"></i>数据质量评估</h3>
+                        <p class="card-text">
+                            全面评估数据的完整性、一致性、准确性和时效性，
+                            通过可视化图表直观展示数据质量状况。
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title"><i class="fas fa-check-circle me-2"></i>数据完整性检查</h3>
+                        <p class="card-text">
+                            检测数据缺失情况，识别关键字段的完整性问题，
+                            提供详细的完整性分析报告。
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title"><i class="fas fa-calculator me-2"></i>数据价值计算</h3>
+                        <p class="card-text">
+                            基于多维度指标，科学计算数据的业务价值和潜在价值，
+                            为数据治理和决策提供依据。
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title"><i class="fas fa-chart-line me-2"></i>数据可视化展示</h3>
+                        <p class="card-text">
+                            通过丰富的图表和仪表盘，直观展示数据分析结果，
+                            帮助您更好地理解数据价值。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0"><i class="fas fa-bullhorn me-2"></i>系统公告</h3>
+            </div>
+            <div class="card-body">
+                <div class="announcement-item mb-3">
+                    <h5>系统正式上线</h5>
+                    <p class="text-muted mb-1"><small><i class="far fa-calendar-alt me-1"></i>2025-09-23</small></p>
+                    <p>数据价值评估系统正式上线，欢迎使用！</p>
+                </div>
+                <div class="announcement-item">
+                    <h5>新功能预告</h5>
+                    <p class="text-muted mb-1"><small><i class="far fa-calendar-alt me-1"></i>2025-09-20</small></p>
+                    <p>即将推出数据价值预测功能，敬请期待！</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h3 class="card-title mb-0"><i class="fas fa-question-circle me-2"></i>快速入门</h3>
+            </div>
+            <div class="card-body">
+                <ol class="ps-3">
+                    <li class="mb-2">注册并登录系统</li>
+                    <li class="mb-2">上传您的数据集</li>
+                    <li class="mb-2">创建数据质量规则</li>
+                    <li class="mb-2">开始数据价值评估</li>
+                    <li>查看评估结果和可视化报告</li>
+                </ol>
+                <div class="d-grid gap-2 mt-3">
+                    <a href="{{ url_for('main.help') }}" class="btn btn-outline-info">
+                        <i class="fas fa-book me-1"></i>查看详细教程
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
