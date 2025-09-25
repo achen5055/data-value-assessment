@@ -38,6 +38,12 @@
    - 自定义数据质量规则
    - 规则组合与评估
 
+## 项目图片展示
+![images1](./images/1.jpg)
+![images2](./images/2.jpg)
+![images3](./images/3.jpg)
+![images4](./images/4.jpg)
+
 ## 安装与配置
 
 1. 克隆仓库:
@@ -114,6 +120,8 @@ data-value-assessment/
 4. **查看结果**
    - 评估完成后，可在评估列表查看评分
    - 点击"可视化"按钮查看详细图表
+   
+   注：默认登录账号：admin   密码：admin123
 
 ## 贡献指南
 
